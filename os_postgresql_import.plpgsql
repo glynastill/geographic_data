@@ -1,0 +1,246 @@
+DROP FUNCTION IF EXISTS public.import_pc_opendata(varchar);
+CREATE OR REPLACE FUNCTION public.import_pc_opendata(in_data varchar)
+RETURNS boolean AS
+$BODY$
+
+DECLARE
+	v_data_root varchar;
+	v_data_main varchar;
+	v_data_areas varchar;
+	v_main_table_created boolean;
+	v_sql text;
+	
+BEGIN
+	v_data_root := in_data || '/';
+	v_data_main := v_data_root || 'Data/';
+	v_data_areas := v_data_root || 'Doc/';
+	
+	RAISE NOTICE '%: Import starting with data root %', clock_timestamp(), v_data_root;
+
+	-- Create our tables if required
+	IF EXISTS (SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = 'public' AND tablename = 'pc_opendata_types') THEN
+		RAISE NOTICE 'Table "public"."pc_opendata_types" already exists';
+	ELSE
+		RAISE NOTICE 'Creating table "public"."pc_opendata_types"';
+		CREATE TABLE public.pc_opendata_types
+		(
+		  id bigserial NOT NULL PRIMARY KEY,
+		  type character varying(3) NOT NULL UNIQUE,
+		  description text NOT NULL
+		);
+	END IF;
+	
+	IF EXISTS (SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = 'public' AND tablename = 'pc_opendata_areas') THEN
+		RAISE NOTICE 'Table "public"."pc_opendata_areas" already exists';
+	ELSE
+		RAISE NOTICE 'Creating table "public"."pc_opendata_areas"';
+		CREATE TABLE public.pc_opendata_areas
+		(
+		  id bigserial NOT NULL PRIMARY KEY,
+		  code character varying(9) NOT NULL UNIQUE,
+		  type character varying(3) NOT NULL REFERENCES public.pc_opendata_types (type),
+		  description text NOT NULL
+		);
+	END IF;
+
+	IF EXISTS (SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = 'public' AND tablename = 'pc_opendata') THEN
+		RAISE NOTICE 'Table "public"."pc_opendata" already exists';
+		v_main_table_created := false;
+	ELSE
+		RAISE NOTICE 'Creating table "public"."pc_opendata"';
+		CREATE TABLE public.pc_opendata
+		(
+		  id bigserial NOT NULL PRIMARY KEY,
+		  postcode character varying(7) NOT NULL,
+		  easting integer NOT NULL,
+		  northing integer NOT NULL,
+		  latitude double precision NOT NULL,
+		  longitude double precision NOT NULL,
+		  country_code character varying(9) REFERENCES public.pc_opendata_areas (code),
+		  admin_county_code character varying(9) REFERENCES public.pc_opendata_areas (code),
+		  admin_district_code character varying(9) REFERENCES public.pc_opendata_areas (code),
+		  admin_ward_code character varying(9) REFERENCES public.pc_opendata_areas (code)
+		);
+		v_main_table_created := true;
+	END IF;
+	
+	-- Import data
+	
+	RAISE NOTICE '% : Importing "public"."pc_opendata_types"', clock_timestamp();
+	v_sql := 'COPY public.pc_opendata_types (type, description) FROM ' || quote_literal(v_data_areas || 'Codelist_AREA_CODES.csv') || ' CSV';
+	EXECUTE v_sql;
+
+	-- Insert missing Country record
+	INSERT INTO public.pc_opendata_types (type, description)  VALUES ('CNY', 'Country');
+	
+	RAISE NOTICE '% : Importing "public"."pc_opendata_areas"', clock_timestamp();
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_CTY.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_DIS.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_DIW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_LBO.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_LBW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_MTD.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_MTW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTA.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTE.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY public.pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTW.csv') || ' CSV';
+	EXECUTE v_sql;
+	
+	-- Insert missing Counties/Countries and missing Scilly Isles
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('W92000004', 'CNY', 'Wales');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E92000001', 'CNY', 'England');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('S92000003', 'CNY', 'Scotland');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008322', 'DIW', 'Bryher Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008323', 'DIW', 'St. Agnes Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', 'St. Martin\'s Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', 'St. Mary\'s Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008326', 'DIW', 'Tresco Ward');
+	
+	-- Finally our postcode data
+	RAISE NOTICE '% : Importing "public"."pc_opendata"', clock_timestamp();
+	v_sql := 'COPY public.pc_opendata (postcode,easting,northing,latitude,longitude,country_code,admin_county_code,admin_district_code,admin_ward_code) FROM '
+	|| quote_literal(v_data_main || 'all_areas_20140324.csv') || ' CSV HEADER';
+	EXECUTE v_sql;
+	
+	if (v_main_table_created) THEN
+		CREATE UNIQUE INDEX pc_opendata_postcode ON public.pc_opendata USING btree (postcode);
+		CREATE INDEX pc_opendata_latitude ON public.pc_opendata USING btree (latitude);
+		CREATE INDEX pc_opendata_longitude ON public.pc_opendata USING btree (longitude);
+	END IF;
+	
+	RAISE NOTICE '%: Completed', clock_timestamp();
+	RETURN true;	
+END;
+
+$BODY$
+LANGUAGE 'plpgsql' VOLATILE;
+
+--
+
+DROP FUNCTION IF EXISTS public.update_pc_opendata(varchar);
+CREATE OR REPLACE FUNCTION public.update_pc_opendata(in_data varchar)
+RETURNS boolean AS
+$BODY$
+
+DECLARE
+	v_data_root varchar;
+	v_data_main varchar;
+	v_data_areas varchar;
+	v_sql text;
+	
+BEGIN
+	v_data_root := in_data || '/';
+	v_data_main := v_data_root || 'Data/';
+	v_data_areas := v_data_root || 'Doc/';
+	
+	RAISE NOTICE '%: Import starting with data root %', clock_timestamp(), v_data_root;
+
+	RAISE NOTICE 'Creating temp table "tmp_pc_opendata_types"';
+	CREATE TEMPORARY TABLE tmp_pc_opendata_types
+	(
+	  id bigserial NOT NULL PRIMARY KEY,
+	  type character varying(3) NOT NULL UNIQUE,
+	  description text NOT NULL
+	);
+	
+	RAISE NOTICE 'Creating temp table "tmp_pc_opendata_areas"';
+	CREATE TEMPORARY TABLE tmp_pc_opendata_areas
+	(
+	  id bigserial NOT NULL PRIMARY KEY,
+	  code character varying(9) NOT NULL UNIQUE,
+	  type character varying(3) NOT NULL REFERENCES tmp_pc_opendata_types (type),
+	  description text NOT NULL
+	);
+
+	RAISE NOTICE 'Creating temp table "tmp_pc_opendata"';
+	CREATE TEMPORARY TABLE tmp_pc_opendata
+	(
+	  id bigserial NOT NULL PRIMARY KEY,
+	  postcode character varying(7) NOT NULL,
+	  easting integer NOT NULL,
+	  northing integer NOT NULL,
+	  latitude double precision NOT NULL,
+	  longitude double precision NOT NULL,
+	  country_code character varying(9) REFERENCES tmp_pc_opendata_areas (code),
+	  admin_county_code character varying(9) REFERENCES tmp_pc_opendata_areas (code),
+	  admin_district_code character varying(9) REFERENCES tmp_pc_opendata_areas (code),
+	  admin_ward_code character varying(9) REFERENCES tmp_pc_opendata_areas (code)
+	);
+	
+	-- Import data
+	RAISE NOTICE '% : Importing "tmp_pc_opendata_types"', clock_timestamp();
+	v_sql := 'COPY tmp_pc_opendata_types (type, description) FROM ' || quote_literal(v_data_areas || 'Codelist_AREA_CODES.csv') || ' CSV';
+	EXECUTE v_sql;
+
+	-- Insert missing Country record
+	INSERT INTO tmp_pc_opendata_types (type, description)  VALUES ('CNY', 'Country');
+	
+	RAISE NOTICE '% : Importing "tmp_pc_opendata_areas"', clock_timestamp();
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_CTY.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_DIS.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_DIW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_LBO.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_LBW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_MTD.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_MTW.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTA.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTE.csv') || ' CSV';
+	EXECUTE v_sql;
+	v_sql := 'COPY tmp_pc_opendata_areas (description, code, type) FROM ' || quote_literal(v_data_areas || 'Codelist_UTW.csv') || ' CSV';
+	EXECUTE v_sql;
+	
+	-- Insert missing Counties/Countries and missing Scilly Isles
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('W92000004', 'CNY', 'Wales');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E92000001', 'CNY', 'England');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('S92000003', 'CNY', 'Scotland');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008322', 'DIW', 'Bryher Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008323', 'DIW', 'St. Agnes Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', 'St. Martin\'s Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', 'St. Mary\'s Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008326', 'DIW', 'Tresco Ward');
+	
+	-- Finally our postcode data
+	RAISE NOTICE '% : Importing "tmp_pc_opendata"', clock_timestamp();
+	v_sql := 'COPY tmp_pc_opendata (postcode,easting,northing,latitude,longitude,country_code,admin_county_code,admin_district_code,admin_ward_code) FROM '
+	|| quote_literal(v_data_main || 'all_areas_20140324.csv') || ' CSV HEADER';
+	EXECUTE v_sql;
+	
+	-- Now do the upgrade with a truncate (if the locking is an issue then it's better to diff and update/delete/insert)
+	RAISE NOTICE '% : Switching the data via truncate & reload', clock_timestamp();
+	TRUNCATE TABLE public.pc_opendata RESTART IDENTITY;
+	TRUNCATE TABLE public.pc_opendata_areas RESTART IDENTITY CASCADE;
+	TRUNCATE TABLE public.pc_opendata_types RESTART IDENTITY CASCADE;
+
+	INSERT INTO public.pc_opendata_types (type, description)
+	SELECT type, description FROM tmp_pc_opendata_areas;
+	
+	INSERT INTO public.pc_opendata_areas (code, type, description)
+	SELECT code, type, description FROM tmp_pc_opendata_areas;
+	
+	INSERT INTO public.pc_opendata (postcode,easting,northing,latitude,longitude,country_code,admin_county_code,admin_district_code,admin_ward_code)
+	SELECT postcode,easting,northing,latitude,longitude,country_code,admin_county_code,admin_district_code,admin_ward_code
+	FROM tmp_pc_opendata;
+	
+	RAISE NOTICE '%: Completed', clock_timestamp();
+	RETURN true;	
+END;
+
+$BODY$
+LANGUAGE 'plpgsql' VOLATILE;
