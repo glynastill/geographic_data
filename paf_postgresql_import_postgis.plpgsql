@@ -267,7 +267,7 @@ BEGIN
 	-- 7) Postzon with latlon generated using postgis
 	TRUNCATE TABLE data_stage;
 	
-	RAISE NOTICE '%: Begin staging postzone', clock_timestamp();
+	RAISE NOTICE '%: Begin staging postzon', clock_timestamp();
 	
 	v_sql := 'COPY data_stage FROM ' || quote_literal(v_data_postzon || 'pzone100.c01');
 	EXECUTE v_sql;	
@@ -946,7 +946,7 @@ BEGIN
 	EXECUTE v_sql;	
 	DELETE FROM data_stage WHERE data like '%WCHANGES' || in_edition || '%' OR data like v_main_footer;
 	
-	RAISE NOTICE '%: Done staging WChanges2 file',clock_timestamp();
+	RAISE NOTICE '%: Done staging WChanges file',clock_timestamp();
 	
 	RAISE NOTICE '%: Preparing to update welsh mainfile', clock_timestamp();
 
@@ -1063,7 +1063,7 @@ BEGIN
 	
 	-- It would appear postzon is supplied as a full refresh rather than an update file
 	TRUNCATE TABLE data_stage;	
-	RAISE NOTICE '%: Begin staging postzone', clock_timestamp();
+	RAISE NOTICE '%: Begin staging postzon', clock_timestamp();
 		
 	v_sql := 'COPY data_stage FROM ' || quote_literal(v_data_postzon || 'pzone100.c01');
 	EXECUTE v_sql;			
