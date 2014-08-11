@@ -1236,7 +1236,7 @@ LEFT OUTER JOIN public.pc_paf_thoroughfare_descriptor td USING (thoroughfare_des
 LEFT OUTER JOIN public.pc_paf_building_names b USING (building_name_key)
 LEFT OUTER JOIN public.pc_paf_sub_building_names sb USING (sub_building_name_key)
 LEFT OUTER JOIN public.pc_paf_organisations o USING (organisation_key, postcode_type)
-LEFT OUTER JOIN public.pc_paf_organisations lo ON m.address_key = lo.organisation_key AND m.postcode_type = lo.postcode_type
+LEFT OUTER JOIN public.pc_paf_organisations lo ON m.address_key = lo.organisation_key AND m.postcode_type = lo.postcode_type AND m.postcode_type = 'L'
 LEFT OUTER JOIN public.pc_paf_postzon_100m p USING (outward_code, inward_code)
 LEFT OUTER JOIN public.pc_paf_county_alias a ON a.postcode = (rpad(m.outward_code,4) || m.inward_code)
 LEFT OUTER JOIN public.pc_paf_counties apc ON apc.county_key = a.former_postal_county;
@@ -1272,7 +1272,7 @@ LEFT OUTER JOIN public.pc_paf_thoroughfare_descriptor td USING (thoroughfare_des
 LEFT OUTER JOIN public.pc_paf_building_names b USING (building_name_key)
 LEFT OUTER JOIN public.pc_paf_sub_building_names sb USING (sub_building_name_key)
 LEFT OUTER JOIN public.pc_paf_organisations o USING (organisation_key, postcode_type)
-LEFT OUTER JOIN public.pc_paf_organisations lo ON mw.address_key = lo.organisation_key AND mw.postcode_type = lo.postcode_type
+LEFT OUTER JOIN public.pc_paf_organisations lo ON mw.address_key = lo.organisation_key AND mw.postcode_type = lo.postcode_type AND mw.postcode_type = 'L'
 LEFT OUTER JOIN public.pc_paf_postzon_100m p USING (outward_code, inward_code)
 LEFT OUTER JOIN public.pc_paf_county_alias a ON a.postcode = (rpad(mw.outward_code,4) || mw.inward_code)
 LEFT OUTER JOIN public.pc_paf_counties apc ON apc.county_key = a.former_postal_county;
