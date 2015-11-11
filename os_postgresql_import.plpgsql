@@ -101,8 +101,8 @@ BEGIN
 	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('S92000003', 'CNY', 'Scotland');
 	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008322', 'DIW', 'Bryher Ward');
 	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008323', 'DIW', 'St. Agnes Ward');
-	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', 'St. Martin\'s Ward');
-	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', 'St. Mary\'s Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', E'St. Martin\'s Ward');
+	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', E'St. Mary\'s Ward');
 	INSERT INTO public.pc_opendata_areas (code, type, description) VALUES ('E05008326', 'DIW', 'Tresco Ward');
 	
 	-- Finally our postcode data
@@ -212,8 +212,8 @@ BEGIN
 	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('S92000003', 'CNY', 'Scotland');
 	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008322', 'DIW', 'Bryher Ward');
 	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008323', 'DIW', 'St. Agnes Ward');
-	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', 'St. Martin\'s Ward');
-	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', 'St. Mary\'s Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008324', 'DIW', E'St. Martin\'s Ward');
+	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008325', 'DIW', E'St. Mary\'s Ward');
 	INSERT INTO tmp_pc_opendata_areas (code, type, description) VALUES ('E05008326', 'DIW', 'Tresco Ward');
 	
 	-- Finally our postcode data

@@ -334,7 +334,7 @@ BEGIN
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_reference_east IS 'BT postcodes reflect the Irish Grid public (different origin and scale); subtract 17000 to approximate onto OS National Grid. For latlong do not approximate but do proper conversion';
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_reference_north IS 'BT postcodes reflect the Irish Grid public (different origin and scale); add 13000 to approximate onto OS National Grid. For latlong do not approximate but do proper conversion';
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.user_type IS '0 Small User 1 Large User';
-		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_status IS '0  Status not supplied by OS \n
+		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_status IS E'0  Status not supplied by OS \n
 			1  Within the building of the matched address closest to the Postcode mean. \n
 			2  Co-ordinates allocated by GROS during Postcode boundary creation to the building nearest the centre of the populated part of the Postcode (Scotland only) \n
 			3  Approximate to within 50m of true position \n
@@ -1032,7 +1032,7 @@ BEGIN
 	-- If I did have a postzon changes file, it'd most likely be best to import the data directly and use postgis to do our conversion
 	-- as the data is selected out of the data_stage table (rather than using the convert_paf.pl script). We could get those fields with
 	-- something like:
-	-- CASE WHEN substring(northing,1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(northing, 'POUTZY', '221100') ELSE northing END || '0' AS f_notrhing,
+	-- CASE WHEN substring(northing,1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(northing, 'POUTZY', '221100') ELSE northing END || '0' AS f_notrhing,
 	-- ST_x(ST_transform(ST_GeomFromText('POINT('||easting||' '||f_northing||')',CASE WHEN postcode LIKE 'BT%' THEN 29903 ELSE 27700 END),4326)) AS longitude,
 	-- ST_y(ST_transform(ST_GeomFromText('POINT('||easting||' '||f_northing||')',CASE WHEN postcode LIKE 'BT%' THEN 29903 ELSE 27700 END),4326)) AS latitude;
 	

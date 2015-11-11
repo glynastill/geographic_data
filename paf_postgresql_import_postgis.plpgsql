@@ -309,7 +309,7 @@ BEGIN
 		nullif(trim(substring(data,5,3)),'') AS inward_code,
 		to_date(substring(data,8,6), 'YYYYMM') AS introduction_date,
 		(nullif(trim(substring(data,14,5)),'') || '0')::integer AS grid_reference_east,		
-		(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')::integer AS grid_reference_north,
+		(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')::integer AS grid_reference_north,
 		nullif(trim(substring(data,24,9)),'') AS country_code,
 		nullif(trim(substring(data,33,9)),'') AS area_code_county,
 		nullif(trim(substring(data,42,9)),'') AS area_code_district,
@@ -318,8 +318,8 @@ BEGIN
 		nullif(trim(substring(data,69,9)),'') AS nhs_code,
 		nullif(trim(substring(data,78,1)),'')::smallint AS user_type,
 		nullif(trim(substring(data,79,1)),'')::smallint AS grid_status,
-		ST_y(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS latitude,
-		ST_x(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS longitude
+		ST_y(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS latitude,
+		ST_x(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS longitude
 	FROM data_stage;
 
 	GET DIAGNOSTICS v_processed = ROW_COUNT;
@@ -334,7 +334,7 @@ BEGIN
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_reference_east IS 'BT postcodes reflect the Irish Grid public (different origin and scale); subtract 17000 to approximate onto OS National Grid. For latlong do not approximate but do proper conversion';
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_reference_north IS 'BT postcodes reflect the Irish Grid public (different origin and scale); add 13000 to approximate onto OS National Grid. For latlong do not approximate but do proper conversion';
 		COMMENT ON COLUMN public.pc_paf_postzon_100m.user_type IS '0 Small User 1 Large User';
-		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_status IS '0  Status not supplied by OS \n
+		COMMENT ON COLUMN public.pc_paf_postzon_100m.grid_status IS E'0  Status not supplied by OS \n
 			1  Within the building of the matched address closest to the Postcode mean. \n
 			2  Co-ordinates allocated by GROS during Postcode boundary creation to the building nearest the centre of the populated part of the Postcode (Scotland only) \n
 			3  Approximate to within 50m of true position \n
@@ -1076,7 +1076,7 @@ BEGIN
 		nullif(trim(substring(data,5,3)),'') AS inward_code,
 		to_date(substring(data,8,6), 'YYYYMM') AS introduction_date,
 		(nullif(trim(substring(data,14,5)),'') || '0')::integer AS grid_reference_east,		
-		(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')::integer AS grid_reference_north,
+		(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')::integer AS grid_reference_north,
 		nullif(trim(substring(data,24,9)),'') AS country_code,
 		nullif(trim(substring(data,33,9)),'') AS area_code_county,
 		nullif(trim(substring(data,42,9)),'') AS area_code_district,
@@ -1085,8 +1085,8 @@ BEGIN
 		nullif(trim(substring(data,69,9)),'') AS nhs_code,
 		nullif(trim(substring(data,78,1)),'')::smallint AS user_type,
 		nullif(trim(substring(data,79,1)),'')::smallint AS grid_status,
-		ST_y(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS latitude,
-		ST_x(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ '[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS longitude
+		ST_y(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS latitude,
+		ST_x(ST_transform(ST_GeomFromText('POINT('||(nullif(trim(substring(data,14,5)),'') || '0')||' '||(CASE WHEN substring(nullif(trim(substring(data,19,5)),''),1,1) ~ E'[\x4f-\x5a]' THEN '1' || translate(nullif(trim(substring(data,19,5)),''), 'POUTZY', '221100') ELSE nullif(trim(substring(data,19,5)),'') END || '0')||')',CASE WHEN nullif(trim(substring(data,1,4)),'') LIKE 'BT%' THEN 29903 ELSE 27700 END),4326))::numeric(8,6) AS longitude
 	FROM data_stage;
 	
 	RAISE NOTICE '%: Done staging postzon with lat long data, updating', clock_timestamp();
