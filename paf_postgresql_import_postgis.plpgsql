@@ -51,7 +51,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 	
-	TRUNCATE TABLE public.pc_paf_localities;
+	TRUNCATE TABLE public.pc_paf_localities CASCADE;
 	INSERT INTO public.pc_paf_localities
 	SELECT substring(data,1,6)::integer,
 		nullif(trim(substring(data,52,30)),''),
@@ -91,7 +91,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 	
-	TRUNCATE TABLE public. pc_paf_thoroughfares;
+	TRUNCATE TABLE public. pc_paf_thoroughfares CASCADE;
 	INSERT INTO public. pc_paf_thoroughfares
 	SELECT substring(data,1,8)::integer,
 		nullif(trim(substring(data,9,60)),'')
@@ -130,7 +130,7 @@ BEGIN
 		v_table_created := true;
 	end if;
 	
-	TRUNCATE TABLE public.pc_paf_thoroughfare_descriptor;
+	TRUNCATE TABLE public.pc_paf_thoroughfare_descriptor CASCADE;
 	INSERT INTO public.pc_paf_thoroughfare_descriptor
 	SELECT substring(data,1,4)::integer,
 		nullif(trim(substring(data,5,20)),''),
@@ -169,7 +169,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 
-	TRUNCATE TABLE public.pc_paf_building_names;
+	TRUNCATE TABLE public.pc_paf_building_names CASCADE;
 	INSERT INTO public.pc_paf_building_names
 	SELECT substring(data,1,8)::integer,
 		nullif(trim(substring(data,9,50)),'')
@@ -207,7 +207,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 
-	TRUNCATE TABLE public.pc_paf_sub_building_names;
+	TRUNCATE TABLE public.pc_paf_sub_building_names CASCADE;
 	INSERT INTO public.pc_paf_sub_building_names
 	SELECT substring(data,1,8)::integer,
 		nullif(trim(substring(data,9,30)),'')
@@ -247,7 +247,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 
-	TRUNCATE TABLE public.pc_paf_organisations;
+	TRUNCATE TABLE public.pc_paf_organisations CASCADE;
 	INSERT INTO public.pc_paf_organisations
 	SELECT substring(data,1,8)::integer,
 		nullif(trim(substring(data,9,1)),''),
@@ -302,7 +302,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 	
-	TRUNCATE TABLE public.pc_paf_postzon_100m;
+	TRUNCATE TABLE public.pc_paf_postzon_100m CASCADE;
 	INSERT INTO public.pc_paf_postzon_100m(outward_code, inward_code, introduction_date, grid_reference_east, grid_reference_north,
 	country_code, area_code_county, area_code_district, ward_code, nhs_region, nhs_code, user_type, grid_status, latitude, longitude)
 	SELECT nullif(trim(substring(data,1,4)),'') AS outward_code,
@@ -559,7 +559,7 @@ BEGIN
 		v_table_created := true;
 	END IF;
 
-	TRUNCATE TABLE public.pc_paf_counties;
+	TRUNCATE TABLE public.pc_paf_counties CASCADE;
 	INSERT INTO public.pc_paf_counties
 	SELECT substring(data,2,4)::integer AS county_key,
 		trim(substring(data,6,30)) AS county_name,
@@ -592,7 +592,7 @@ BEGIN
 		v_table_created := true;
 	END IF;	
 	
-	TRUNCATE TABLE public.pc_paf_county_alias;
+	TRUNCATE TABLE public.pc_paf_county_alias CASCADE;
 	INSERT INTO public.pc_paf_county_alias (postcode, former_postal_county, traditional_county, administrative_county)
 	SELECT trim(substring(data,2,7)) AS postcode,
 		nullif(substring(data,9,4)::integer,0) AS former_postal_county,
